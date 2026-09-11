@@ -51,6 +51,10 @@ use crate::user::{
     UserInfo as PyUserInfo, UserInfoDetails as PyUserInfoDetails, UserStatus as PyUserStatus,
 };
 use tokio::sync::Mutex;
+use crate::client_info::{
+    ClientInfo as PyClientInfo,
+    ClientInfoDetails as PyClientInfoDetails,
+};
 
 /// A Python class representing the Iggy client.
 /// It provides asynchronous functionality through the contained runtime.
@@ -1471,6 +1475,74 @@ impl IggyClient {
                 .await
                 .map_err(|e| PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e.to_string()))?;
             Ok(Python::attach(|py| PyBytes::new(py, &response).unbind()))
+        })
+    }
+
+    /// Get info about this client's own connection.
+    ///
+    /// Returns:
+    ///     An awaitable that resolves to `ClientInfoDetails`.
+    ///
+    /// Raises:
+    ///     PyRuntimeError: If the request fails.
+    #[gen_stub(override_return_type(type_repr="collections.abc.Awaitable[ClientInfoDetails]", imports=("collections.abc")))]
+    fn get_me<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyAny>> {
+        let inner = self.inner.clone();
+        future_into_py(py, async move {
+            let info = inner
+                .get_me()
+                .await
+                .map_err(|e| PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e.to_string()))?;
+            Ok(PyClientInfoDetails::from(info))
+        })
+    }
+
+    /// Get info about a specific client by its numeric client ID.
+    ///
+    /// Args:
+    ///     client_id: The numeric client ID as `int`.
+    ///
+    /// Returns:
+    ///     An awaitable that resolves to `ClientInfoDetails` if found, or `None`.
+    ///
+    /// Raises:
+    ///     PyRuntimeError: If the request fails.
+    #[gen_stub(override_return_type(type_repr="collections.abc.Awaitable[ClientInfoDetails | None]", imports=("collections.abc")))]
+    fn get_client<'a>(&self, py: Python<'a>, client_id: u32) -> PyResult<Bound<'a, PyAny>> {
+        let inner = self.inner.clone();
+        future_into_py(py, async move {
+            let info = inner
+                .get_client(client_id)
+                .await
+                .map_err(|e| PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e.to_string()))?;
+            Ok(info.map(PyClientInfoDetails::from))
+        })
+    }
+
+    /// Get info about all connected clients.
+    ///
+    /// Requires the `read_servers` or `manage_servers` global permission.
+    ///
+    /// Best-effort: the server gathers this list across every shard with a
+    /// bounded timeout, and a shard that misses it is dropped from the
+    /// result rather than failing the call. A client connected to a slow or
+    /// overloaded shard can therefore be missing from an individual call's
+    /// result.
+    ///
+    /// Returns:
+    ///     An awaitable that resolves to `list[ClientInfo]`.
+    ///
+    /// Raises:
+    ///     PyRuntimeError: If the request fails.
+    #[gen_stub(override_return_type(type_repr="collections.abc.Awaitable[list[ClientInfo]]", imports=("collections.abc")))]
+    fn get_clients<'a>(&self, py: Python<'a>) -> PyResult<Bound<'a, PyAny>> {
+        let inner = self.inner.clone();
+        future_into_py(py, async move {
+            let clients = inner
+                .get_clients()
+                .await
+                .map_err(|e| PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e.to_string()))?;
+            Ok(clients.into_iter().map(PyClientInfo::from).collect::<Vec<_>>())
         })
     }
 }

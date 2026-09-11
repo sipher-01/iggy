@@ -71,6 +71,9 @@ __all__ = [
     "WebSocketConfig",
     "WebSocketFramingConfig",
     "WebSocketReconnectionConfig",
+    "ClientInfo",
+    "ClientInfoDetails",
+    "ConsumerGroupInfo",
 ]
 
 class AutoCommit:
@@ -1678,6 +1681,50 @@ class IggyClient:
         Raises:
             RuntimeError: If the command cannot be sent or the server returns an error.
         """
+    def get_me(self) -> collections.abc.Awaitable[ClientInfoDetails]:
+        r"""
+        Get info about this client's own connection.
+
+        Returns:
+            An awaitable that resolves to `ClientInfoDetails`.
+
+        Raises:
+            PyRuntimeError: If the request fails.
+        """
+    def get_client(
+        self, client_id: builtins.int
+    ) -> collections.abc.Awaitable[ClientInfoDetails | None]:
+        r"""
+        Get info about a specific client by its numeric ID.
+
+        Args:
+            client_id: The numeric client ID as `int`.
+
+        Returns:
+            An awaitable that resolves to `ClientInfoDetails` if the client exists,
+            or `None` if the ID is unknown.
+
+        Raises:
+            PyRuntimeError: If the request fails.
+        """
+    def get_clients(self) -> collections.abc.Awaitable[list[ClientInfo]]:
+        r"""
+        /// Get info about all connected clients.
+        ///
+        /// Requires the `read_servers` or `manage_servers` global permission.
+        ///
+        /// Best-effort: the server gathers this list across every shard with a
+        /// bounded timeout, and a shard that misses it is dropped from the
+        /// result rather than failing the call. A client connected to a slow or
+        /// overloaded shard can therefore be missing from an individual call's
+        /// result.
+        ///
+        /// Returns:
+        ///     An awaitable that resolves to `list[ClientInfo]`.
+        ///
+        /// Raises:
+        ///     PyRuntimeError: If the request fails.
+        """
 
 @typing.final
 class IggyConsumer:
@@ -3205,3 +3252,54 @@ class UserStatus(enum.Enum):
     r"""
     The user account is inactive and cannot be used.
     """
+
+@typing.final
+class ConsumerGroupInfo:
+    @property
+    def stream_id(self) -> builtins.int:
+        r"""The numeric ID of the stream."""
+    @property
+    def topic_id(self) -> builtins.int:
+        r"""The numeric ID of the topic."""
+    @property
+    def consumer_group_id(self) -> builtins.int:
+        r"""The numeric ID of the consumer group."""
+
+@typing.final
+class ClientInfo:
+    @property
+    def client_id(self) -> builtins.int:
+        r"""The unique identifier of the client."""
+    @property
+    def user_id(self) -> builtins.int | None:
+        r"""The numeric user ID, or None if not yet authenticated."""
+    @property
+    def address(self) -> builtins.str:
+        r"""The remote address of the client."""
+    @property
+    def transport(self) -> builtins.str:
+        r"""The transport protocol used by the client."""
+    @property
+    def consumer_groups_count(self) -> builtins.int:
+        r"""The number of consumer groups the client participates in."""
+
+@typing.final
+class ClientInfoDetails:
+    @property
+    def client_id(self) -> builtins.int:
+        r"""The unique identifier of the client."""
+    @property
+    def user_id(self) -> builtins.int | None:
+        r"""The numeric user ID, or None if not yet authenticated."""
+    @property
+    def address(self) -> builtins.str:
+        r"""The remote address of the client."""
+    @property
+    def transport(self) -> builtins.str:
+        r"""The transport protocol used by the client."""
+    @property
+    def consumer_groups_count(self) -> builtins.int:
+        r"""The number of consumer groups the client participates in."""
+    @property
+    def consumer_groups(self) -> list[ConsumerGroupInfo]:
+        r"""The consumer groups the client participates in."""

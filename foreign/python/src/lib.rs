@@ -30,6 +30,7 @@ mod stream;
 mod topic;
 mod user;
 mod user_headers;
+mod client_info;
 
 use client::IggyClient;
 use config::{
@@ -51,6 +52,7 @@ use stream::{Stream, StreamDetails};
 use topic::{IggyExpiry, MaxTopicSize, Partition, Topic, TopicDetails};
 use user::{UserInfo, UserInfoDetails, UserStatus};
 use user_headers::{HeaderKey, HeaderValue, UserHeaders};
+use client_info::{ClientInfo, ClientInfoDetails, ConsumerGroupInfo};
 
 /// Python client for Apache Iggy, the persistent message streaming platform.
 #[pymodule]
@@ -101,5 +103,8 @@ fn apache_iggy(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<GlobalPermissions>()?;
     m.add_class::<StreamPermissions>()?;
     m.add_class::<TopicPermissions>()?;
+    m.add_class::<ConsumerGroupInfo>()?;
+    m.add_class::<ClientInfo>()?;
+    m.add_class::<ClientInfoDetails>()?;
     Ok(())
 }

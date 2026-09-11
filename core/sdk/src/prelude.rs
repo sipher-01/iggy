@@ -51,8 +51,8 @@ pub use crate::tcp::tcp_client::TcpClient;
 pub use crate::websocket::websocket_client::WebSocketClient;
 pub use iggy_common::{
     Aes256GcmEncryptor, Args, ArgsOptional, AutoLogin, CacheMetrics, CacheMetricsKey, ClientError,
-    ClientInfoDetails, ClusterMetadata, ClusterNode, ClusterNodeRole, ClusterNodeStatus,
-    CompressionAlgorithm, Consumer, ConsumerGroup, ConsumerGroupDetails, ConsumerGroupMember,
+    ClientInfo, ClientInfoDetails, ClusterMetadata, ClusterNode, ClusterNodeRole, ClusterNodeStatus,
+    CompressionAlgorithm, Consumer, ConsumerGroup, ConsumerGroupDetails, ConsumerGroupInfo, ConsumerGroupMember,
     ConsumerKind, Credentials, EncryptorKind, GlobalPermissions, HeaderField, HeaderKey,
     HeaderKind, HeaderValue, HttpClientConfig, HttpClientConfigBuilder, HttpMethod, IdKind,
     Identifier, IdentityInfo, IggyByteSize, IggyDuration, IggyError, IggyExpiry, IggyIndexView,
